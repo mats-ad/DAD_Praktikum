@@ -13,24 +13,21 @@ API_KEY = os.getenv("ALPHA_VANTAGE_KEY")
 
 BASE_URL = "https://www.alphavantage.co/query"
 
-def fetch_global_quote(symbol: str):
+
+def fetch_global_quote(symbol: str) -> float | None:
     params = {
         "function": "GLOBAL_QUOTE",
         "symbol": symbol,
         "apikey": API_KEY
     }
-    resp = requests.get(BASE_URL, params=params)
-    return resp.json()
+    r = requests.get(BASE_URL, params=params, timeout=15)
+    data = r.json()
 
-def fetch_daily(symbol: str):
-    params = {
-        "function": "TIME_SERIES_DAILY",
-        "symbol": symbol,
-        "apikey": API_KEY,
-        "outputsize": "compact"
-    }
-    resp = requests.get(BASE_URL, params=params)
-    return resp.json()
+    try:
+        return float(data["Global Quote"]["05. price"])
+    except Exception:
+        return None
+
 
 def main():
     if not API_KEY:
@@ -38,28 +35,31 @@ def main():
 
     producer = KafkaProducer(
         bootstrap_servers=KAFKA_BROKER,
-        value_serializer=lambda v: json.dumps(v).encode("utf-8")
+        value_serializer=lambda v: json.dumps(v).encode("utf-8"),
     )
-
-    print("Alpha Vantage Ingest gestartet...")
 
     symbols = ["AAPL", "MSFT", "NVDA", "AMZN", "GOOGL"]
 
+    print("Alpha Vantage Ingest gestartet…")
+
     while True:
         for symbol in symbols:
-            try:
-                data = {
-                    "symbol": symbol,
-                    "global_quote": fetch_global_quote(symbol),
-                    "daily": fetch_daily(symbol)
-                }
-                producer.send(TOPIC, data)
-                print(f"[SEND] {symbol} -> prices_raw")
-            except Exception as e:
-                print(f"[ERROR] {symbol}: {e}")
+            price = fetch_global_quote(symbol)
 
-        print("Sleep 60s (free API, limit ~25 requests/min)...")
+            event = {
+                "symbol": symbol,
+                "price": price,          # None, wenn Free Tier blockiert
+                "source": "alpha_vantage"
+            }
+
+            producer.send(TOPIC, event)
+            print(f"[SEND] {symbol} price={price}")
+
+            time.sleep(3)  # Rate Limit schonen
+
+        print("Sleep 60s…")
         time.sleep(60)
+
 
 if __name__ == "__main__":
     main()

@@ -22,3 +22,33 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: gabi
+      POSTGRES_USER: gabi
+      POSTGRES_PASSWORD: gabi_pw
+    ports:
+      - "5432:5432"
+    volumes:
+      - gabi_pgdata:/var/lib/postgresql/data
+      - ./serving/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+
+  api:
+    build:
+      context: .
+      dockerfile: serving/Dockerfile
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+    environment:
+      PG_HOST: postgres
+      PG_PORT: "5432"
+      PG_DB: gabi
+      PG_USER: gabi
+      PG_PASSWORD: gabi_pw
+
+volumes:
+  gabi_pgdata:
