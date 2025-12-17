@@ -133,7 +133,7 @@ Alle verarbeiteten Daten werden im **Parquet-Format** im lokalen Data Lake abgel
 
 Struktur:
 ```ASCII
-ta/
+data/
 └── lake/
 ├── prices/
 │ ├── speed/
@@ -142,9 +142,9 @@ ta/
 └── reddit/
 ├── speed/
 └── batch_daily/
+```
 
-D
-```ie Parquet-Dateien können direkt mit:
+Die Parquet-Dateien können direkt mit:
 
 - Pandas
 - Spark
