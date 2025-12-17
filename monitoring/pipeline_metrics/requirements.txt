@@ -1,0 +1,5 @@
+prometheus_client==0.21.0
+confluent-kafka==2.5.3
+psycopg2-binary==2.9.9
+pyarrow==17.0.0
+pandas==2.2.3

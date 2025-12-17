@@ -2,7 +2,7 @@ import os, json, time
 import requests
 from kafka import KafkaProducer
 
-KAFKA_BROKER = os.getenv("KAFKA_BROKER", "localhost:9092")
+KAFKA_BROKER = os.getenv("KAFKA_BROKER", "localhost:29092")
 TOPIC = "social_raw"
 
 USER_AGENT = "gabi-dad-project/0.1 (contact: mats.adel@haw-hamburg.de)"  
@@ -19,8 +19,9 @@ def fetch_listing(subreddit: str, listing: str = "new", limit: int = 50):
 def main():
     producer = KafkaProducer(
         bootstrap_servers=KAFKA_BROKER,
-        value_serializer=lambda v: json.dumps(v).encode("utf-8")
-    )
+        value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+        api_version=(3, 5, 0),
+    )   
 
     seen = set()
     print("Reddit public scraper gestartet…")

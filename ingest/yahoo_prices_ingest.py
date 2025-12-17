@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-KAFKA_BROKER = os.getenv("KAFKA_BROKER", "localhost:9092")
+KAFKA_BROKER = os.getenv("KAFKA_BROKER", "localhost:29092")
 TOPIC = "prices_raw"
 
 SYMBOLS = ["AAPL", "MSFT", "NVDA", "AMZN", "GOOGL"]  # Yahoo Ticker
@@ -50,6 +50,7 @@ def main():
     producer = KafkaProducer(
         bootstrap_servers=KAFKA_BROKER,
         value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+        api_version=(3, 5, 0),
     )
 
     print("Yahoo Finance ingest gestartet…")

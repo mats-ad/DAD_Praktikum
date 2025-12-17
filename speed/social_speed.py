@@ -1,22 +1,22 @@
-# speed/social_speed.py
 import re
 from typing import List
+import os
 
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import (
     col, from_json, explode, current_timestamp,
-    from_unixtime, concat_ws, lit, size, length
+    from_unixtime, concat_ws, size, length
 )
 from pyspark.sql.types import (
     StructType, StructField, StringType,
     DoubleType, IntegerType, ArrayType
 )
 
-KAFKA_BROKER = "localhost:9092"
-TOPIC = "social_raw"
+KAFKA_BROKER = os.getenv("KAFKA_BROKER", "localhost:29092")
+TOPIC = os.getenv("SOCIAL_TOPIC", "social_raw")
 
-OUT_PATH = "data/lake/social/reddit/speed"
-CHECKPOINT = "data/checkpoints/social_speed"
+OUT_PATH = os.getenv("SOCIAL_SPEED_OUT", "data/lake/social/reddit/speed")
+CHECKPOINT = os.getenv("SOCIAL_SPEED_CHECKPOINT", "data/checkpoints/social_speed")
 
 TRACKED_TICKERS = {"AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "TSLA"}
 
@@ -43,13 +43,13 @@ def main():
     spark = (
         SparkSession.builder
         .appName("SocialSpeedLayer")
+        # WICHTIG: Spark 3.5.x + Scala 2.12
         .config(
             "spark.jars.packages",
-            "org.apache.spark:spark-sql-kafka-0-10_2.13:4.1.0"
+            "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1"
         )
         .getOrCreate()
     )
-
     spark.sparkContext.setLogLevel("WARN")
 
     df_kafka = (
@@ -79,26 +79,13 @@ def main():
         df_parsed
         .withColumn("ingest_ts", current_timestamp())
         .withColumn("created_ts", from_unixtime(col("created_utc")).cast("timestamp"))
-        .withColumn(
-            "full_text",
-            concat_ws("\n", col("title"), col("text"))
-        )
+        .withColumn("full_text", concat_ws("\n", col("title"), col("text")))
         .withColumn("tickers", extract_udf(col("full_text")))
         .where(size(col("tickers")) > 0)
         .withColumn("ticker", explode(col("tickers")))
         .withColumn("text_length", length(col("full_text")))
     )
 
-    # Debug
-    # (
-    #     df_enriched.writeStream
-    #     .format("console")
-    #     .outputMode("append")
-    #     .option("truncate", False)
-    #     .start()
-    # )
-
-    # Data Lake
     (
         df_enriched.writeStream
         .format("parquet")
@@ -109,7 +96,6 @@ def main():
     )
 
     spark.streams.awaitAnyTermination()
-
 
 if __name__ == "__main__":
     main()
