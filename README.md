@@ -132,8 +132,8 @@ Ziel: niedrige Latenz für aktuelle Preisdaten.
 Alle verarbeiteten Daten werden im **Parquet-Format** im lokalen Data Lake abgelegt.
 
 Struktur:
-
-data/
+```ASCII
+ta/
 └── lake/
 ├── prices/
 │ ├── speed/
@@ -143,7 +143,8 @@ data/
 ├── speed/
 └── batch_daily/
 
-Die Parquet-Dateien können direkt mit:
+D
+```ie Parquet-Dateien können direkt mit:
 
 - Pandas
 - Spark
