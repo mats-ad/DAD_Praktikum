@@ -132,7 +132,7 @@ Ziel: niedrige Latenz für aktuelle Preisdaten.
 Alle verarbeiteten Daten werden im **Parquet-Format** im lokalen Data Lake abgelegt.
 
 Struktur:
-
+```ASCII
 data/
 └── lake/
 ├── prices/
@@ -142,6 +142,7 @@ data/
 └── reddit/
 ├── speed/
 └── batch_daily/
+```
 
 Die Parquet-Dateien können direkt mit:
 
