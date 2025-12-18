@@ -40,7 +40,8 @@ def main():
     try:
         # 1) Infra
         print("[BOOT] starting docker infrastructure...")
-        subprocess.run(["docker", "compose", "up", "-d", "--build"], check=True)
+        #subprocess.run(["docker", "compose", "up", "-d", "--build"], check=True)
+        # subprocess.run(["docker", "compose", "start"], check=True)
 
         # 2) Topics
         print("[BOOT] creating kafka topics...")

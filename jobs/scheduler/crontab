@@ -1,0 +1,5 @@
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# alle 5 Minuten
+*/5 * * * * root /app/run_all.sh >> /var/log/cron.log 2>&1

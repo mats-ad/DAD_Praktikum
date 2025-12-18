@@ -12,7 +12,15 @@ load_dotenv()
 KAFKA_BROKER = os.getenv("KAFKA_BROKER", "localhost:29092")
 TOPIC = "prices_raw"
 
-SYMBOLS = ["AAPL", "MSFT", "NVDA", "AMZN", "GOOGL"]  # Yahoo Ticker
+SYMBOLS = [
+    "AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA",
+    "JPM", "V", "MA", "BAC",
+    "WMT", "COST", "NKE",
+    "JNJ", "PFE",
+    "XOM", "CVX", "BA",
+    "GME"
+]
+
 POLL_SECONDS = 30  # alle 30s reicht locker
 
 

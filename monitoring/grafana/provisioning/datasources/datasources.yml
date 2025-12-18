@@ -1,0 +1,31 @@
+apiVersion: 1
+
+deleteDatasources:
+  - name: Postgres
+    orgId: 1
+  - name: Prometheus
+    orgId: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    uid: prom
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+
+  - name: Postgres
+    type: postgres
+    uid: pg
+    access: proxy
+    url: postgres:5432
+    user: gabi
+    secureJsonData:
+      password: gabi_pw
+    jsonData:
+      database: gabi
+      sslmode: disable
+      postgresVersion: 1600
+      timescaledb: false
+    editable: false

@@ -4,10 +4,10 @@
   "tags": ["DAD", "Praktikum", "GABI"],
   "timezone": "browser",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "refresh": "10s",
   "style": "dark",
-  "time": { "from": "now-30m", "to": "now" },
+  "time": { "from": "now-30d", "to": "now" },
   "annotations": {
     "list": [
       {
@@ -24,18 +24,10 @@
   "templating": {
     "list": [
       {
-        "type": "datasource",
-        "name": "DS_PROMETHEUS",
-        "label": "Prometheus",
-        "query": "prometheus",
-        "current": {},
-        "refresh": 1
-      },
-      {
         "type": "query",
         "name": "topic",
         "label": "Kafka Topic",
-        "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "datasource": { "type": "prometheus", "uid": "prom" },
         "query": "label_values(dad_kafka_topic_end_offset, topic)",
         "refresh": 1,
         "includeAll": true,
@@ -46,12 +38,23 @@
         "type": "query",
         "name": "dataset",
         "label": "Lake Dataset",
-        "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "datasource": { "type": "prometheus", "uid": "prom" },
         "query": "label_values(dad_lake_rows, dataset)",
         "refresh": 1,
         "includeAll": true,
         "multi": true,
         "current": { "selected": true, "text": "All", "value": "$__all" }
+      },
+      {
+        "type": "query",
+        "name": "ticker",
+        "label": "Ticker (Joined)",
+        "datasource": { "type": "postgres", "uid": "pg" },
+        "query": "SELECT DISTINCT ticker FROM joined_daily ORDER BY 1;",
+        "refresh": 1,
+        "multi": false,
+        "includeAll": false,
+        "current": { "selected": true, "text": "AAPL", "value": "AAPL" }
       }
     ]
   },
@@ -67,7 +70,7 @@
       "title": "Kafka UP",
       "id": 1,
       "gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "prom" },
       "targets": [{ "refId": "A", "expr": "dad_kafka_up", "instant": true }],
       "options": {
         "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
@@ -99,7 +102,7 @@
       "title": "Postgres UP",
       "id": 2,
       "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "prom" },
       "targets": [{ "refId": "A", "expr": "dad_postgres_up", "instant": true }],
       "options": {
         "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
@@ -131,7 +134,7 @@
       "title": "Pipeline Metrics Exporter UP",
       "id": 3,
       "gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "prom" },
       "targets": [
         {
           "refId": "A",
@@ -169,7 +172,7 @@
       "title": "Prometheus Scrape Health (Targets)",
       "id": 4,
       "gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "prom" },
       "targets": [{ "refId": "A", "expr": "sum(up)", "instant": true }],
       "options": {
         "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
@@ -190,7 +193,7 @@
       "title": "Kafka End Offsets (Wachstum = Daten kommen rein)",
       "id": 10,
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "prom" },
       "targets": [
         {
           "refId": "A",
@@ -208,7 +211,7 @@
       "title": "Kafka Input Rate (Offsets/sec) – grober Throughput",
       "id": 11,
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "prom" },
       "targets": [
         {
           "refId": "A",
@@ -233,7 +236,7 @@
       "title": "Lake Row Count (zeigt: Dateien entstehen & Daten wachsen)",
       "id": 20,
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 15 },
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "prom" },
       "targets": [
         {
           "refId": "A",
@@ -251,7 +254,7 @@
       "title": "Seconds Since Last Update (niedrig = Pipeline läuft)",
       "id": 21,
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 15 },
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "prom" },
       "targets": [
         {
           "refId": "A",
@@ -290,7 +293,7 @@
       "title": "Postgres Connections",
       "id": 30,
       "gridPos": { "h": 7, "w": 12, "x": 0, "y": 24 },
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "prom" },
       "targets": [
         {
           "refId": "A",
@@ -308,7 +311,7 @@
       "title": "Postgres Transactions (rate)",
       "id": 31,
       "gridPos": { "h": 7, "w": 12, "x": 12, "y": 24 },
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "prom" },
       "targets": [
         {
           "refId": "A",
@@ -338,7 +341,7 @@
       "title": "Speed Layer aktiv? (prices_speed rows > 0)",
       "id": 40,
       "gridPos": { "h": 4, "w": 8, "x": 0, "y": 32 },
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "prom" },
       "targets": [
         {
           "refId": "A",
@@ -369,7 +372,7 @@
       "title": "Batch Layer aktiv? (social_batch_daily rows > 0)",
       "id": 41,
       "gridPos": { "h": 4, "w": 8, "x": 8, "y": 32 },
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "prom" },
       "targets": [
         {
           "refId": "A",
@@ -400,7 +403,7 @@
       "title": "Pipeline frisch? (max staleness < 15min)",
       "id": 42,
       "gridPos": { "h": 4, "w": 8, "x": 16, "y": 32 },
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "prom" },
       "targets": [
         {
           "refId": "A",
@@ -427,12 +430,185 @@
         },
         "overrides": []
       }
+    },
+
+    {
+      "type": "row",
+      "title": "F) Joined Daily (Postgres) – Sentiment/Mentions vs Price",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 37 },
+      "id": 105
+    },
+    {
+      "type": "timeseries",
+      "title": "Price (daily last) – Joined",
+      "id": 50,
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 38 },
+      "datasource": { "type": "postgres", "uid": "pg" },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT day as \"time\", price_day_last as value FROM joined_daily WHERE ticker = '$ticker' ORDER BY day;",
+          "timeColumn": "time",
+          "metricColumn": "none",
+          "valueColumn": "value"
+        }
+      ],
+      "options": {
+        "legend": { "showLegend": true, "placement": "bottom" },
+        "tooltip": { "mode": "single" }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Sentiment (avg compound) – Joined",
+      "id": 51,
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 38 },
+      "datasource": { "type": "postgres", "uid": "pg" },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT day as \"time\", avg_sentiment as value FROM joined_daily WHERE ticker = '$ticker' ORDER BY day;",
+          "timeColumn": "time",
+          "metricColumn": "none",
+          "valueColumn": "value"
+        }
+      ],
+      "options": {
+        "legend": { "showLegend": true, "placement": "bottom" },
+        "tooltip": { "mode": "single" }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Mentions – Joined",
+      "id": 52,
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 46 },
+      "datasource": { "type": "postgres", "uid": "pg" },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT day as \"time\", mentions as value FROM joined_daily WHERE ticker = '$ticker' ORDER BY day;",
+          "timeColumn": "time",
+          "metricColumn": "none",
+          "valueColumn": "value"
+        }
+      ],
+      "options": {
+        "legend": { "showLegend": true, "placement": "bottom" },
+        "tooltip": { "mode": "single" }
+      }
+    },
+
+    {
+      "type": "row",
+      "title": "G) Investment Signal (Postgres) – BUY/HOLD/SELL",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 54 },
+      "id": 106
+    },
+    {
+      "type": "stat",
+      "title": "Investment Signal (latest)",
+      "id": 60,
+      "gridPos": { "h": 5, "w": 8, "x": 0, "y": 55 },
+      "datasource": { "type": "postgres", "uid": "pg" },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT day::timestamp as \"time\", CASE signal WHEN 'SELL' THEN -1 WHEN 'HOLD' THEN 0 WHEN 'BUY' THEN 1 END::double precision as value FROM investment_signal_daily WHERE ticker = '$ticker' ORDER BY day DESC LIMIT 1;",
+          "timeColumn": "time",
+          "metricColumn": "none",
+          "valueColumn": "value"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "orientation": "horizontal",
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "-1": { "text": "SELL" },
+                "0": { "text": "HOLD" },
+                "1": { "text": "BUY" }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": -1 },
+              { "color": "yellow", "value": 0 },
+              { "color": "green", "value": 1 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "table",
+      "title": "Investment Signal – last 30 days",
+      "id": 61,
+      "gridPos": { "h": 10, "w": 16, "x": 8, "y": 55 },
+      "datasource": { "type": "postgres", "uid": "pg" },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT day, signal, mentions, avg_sentiment, price_day_last, mentions_delta, sentiment_delta, price_delta FROM investment_signal_daily WHERE ticker = '$ticker' ORDER BY day DESC LIMIT 30;"
+        }
+      ],
+      "options": { "showHeader": true }
+    },
+    {
+      "type": "timeseries",
+      "title": "Signal Drivers (Deltas) – Mentions / Sentiment / Price",
+      "id": 62,
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 65 },
+      "datasource": { "type": "postgres", "uid": "pg" },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT day::timestamp as \"time\", mentions_delta::double precision as value, 'mentions_delta' as metric FROM investment_signal_daily WHERE ticker = '$ticker' ORDER BY day;",
+          "timeColumn": "time",
+          "metricColumn": "metric",
+          "valueColumn": "value"
+        },
+        {
+          "refId": "B",
+          "format": "time_series",
+          "rawSql": "SELECT day::timestamp as \"time\", sentiment_delta as value, 'sentiment_delta' as metric FROM investment_signal_daily WHERE ticker = '$ticker' ORDER BY day;",
+          "timeColumn": "time",
+          "metricColumn": "metric",
+          "valueColumn": "value"
+        },
+        {
+          "refId": "C",
+          "format": "time_series",
+          "rawSql": "SELECT day::timestamp as \"time\", price_delta as value, 'price_delta' as metric FROM investment_signal_daily WHERE ticker = '$ticker' ORDER BY day;",
+          "timeColumn": "time",
+          "metricColumn": "metric",
+          "valueColumn": "value"
+        }
+      ],
+      "options": {
+        "legend": { "showLegend": true, "placement": "bottom" },
+        "tooltip": { "mode": "single" }
+      }
     }
   ],
-  "variables": [],
-  "links": [],
   "timepicker": {
     "refresh_intervals": ["5s", "10s", "30s", "1m", "5m"],
-    "time_options": ["5m", "15m", "30m", "1h", "6h", "12h", "24h"]
+    "time_options": ["5m", "15m", "30m", "1h", "6h", "12h", "24h", "7d", "30d"]
   }
 }

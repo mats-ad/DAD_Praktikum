@@ -14,8 +14,8 @@ services:
     depends_on:
       - zookeeper
     ports:
-      - "29092:29092" # Host-Port (Mac) -> Kafka
-      - "9092:9092"
+      - "29092:29092" # Host -> Kafka
+      - "9092:9092" # optional
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
@@ -67,6 +67,30 @@ services:
       PG_USER: gabi
       PG_PASSWORD: gabi_pw
 
+  joined_to_postgres:
+    build:
+      context: .
+      dockerfile: jobs/joined_to_postgres/Dockerfile
+    container_name: gabi_joined_to_postgres
+    environment:
+      # Parquet im gemounteten /data
+      JOINED_PATH: /data/lake/joined/daily
+
+      # JDBC im Container: postgres (Service-Name), nicht localhost
+      PG_URL: jdbc:postgresql://postgres:5432/gabi
+      PG_USER: gabi
+      PG_PASSWORD: gabi_pw
+      PG_TABLE: joined_daily
+
+      # alle 5 Minuten neu schreiben
+      INTERVAL_SECONDS: "300"
+    volumes:
+      - ./data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
   prometheus:
     image: prom/prometheus:latest
     container_name: gabi_prometheus
@@ -95,6 +119,7 @@ services:
       - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
     depends_on:
       - prometheus
+      - postgres
 
   kafka_exporter:
     image: danielqsj/kafka-exporter:latest
@@ -133,6 +158,33 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: jobs/scheduler/Dockerfile
+    container_name: gabi_scheduler
+    environment:
+      LAKE_ROOT: /data/lake
+
+      # Spark Jobs brauchen JDBC url/creds:
+      PG_URL: jdbc:postgresql://postgres:5432/gabi
+      PG_USER: gabi
+      PG_PASSWORD: gabi_pw
+      PG_TABLE: joined_daily
+
+      # psql (investment_signal.sql)
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: gabi
+      POSTGRES_USER: gabi
+      POSTGRES_PASSWORD: gabi_pw
+    volumes:
+      - ./data:/data
+      - ./batch:/app/batch:ro
+      - ./serving:/app/serving:ro
+    depends_on:
       postgres:
         condition: service_healthy
 

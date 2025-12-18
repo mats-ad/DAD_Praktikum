@@ -18,7 +18,12 @@ TOPIC = os.getenv("SOCIAL_TOPIC", "social_raw")
 OUT_PATH = os.getenv("SOCIAL_SPEED_OUT", "data/lake/social/reddit/speed")
 CHECKPOINT = os.getenv("SOCIAL_SPEED_CHECKPOINT", "data/checkpoints/social_speed")
 
-TRACKED_TICKERS = {"AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "TSLA"}
+TRACKED_TICKERS = {"AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA",
+    "JPM", "V", "MA", "BAC",
+    "WMT", "COST", "NKE",
+    "JNJ", "PFE",
+    "XOM", "CVX", "BA",
+    "GME"}
 
 schema = StructType([
     StructField("source", StringType()),

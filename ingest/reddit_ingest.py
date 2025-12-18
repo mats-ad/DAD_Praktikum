@@ -6,9 +6,14 @@ KAFKA_BROKER = os.getenv("KAFKA_BROKER", "localhost:29092")
 TOPIC = "social_raw"
 
 USER_AGENT = "gabi-dad-project/0.1 (contact: mats.adel@haw-hamburg.de)"  
-SUBREDDITS = ["stocks", "investing", "wallstreetbets"]
+SUBREDDITS = [
+  "stocks", "investing", "wallstreetbets",
+  "StockMarket", "pennystocks", "options", "thetagang",
+  "SecurityAnalysis", "ValueInvesting", "Daytrading", "algotrading",
+  "finance", "economy", "CryptoCurrency"
+]
 
-def fetch_listing(subreddit: str, listing: str = "new", limit: int = 50):
+def fetch_listing(subreddit: str, listing: str = "new", limit: int = 100):
     url = f"https://www.reddit.com/r/{subreddit}/{listing}.json"
     headers = {"User-Agent": USER_AGENT}
     params = {"limit": limit}
@@ -29,7 +34,7 @@ def main():
     while True:
         for sub in SUBREDDITS:
             try:
-                data = fetch_listing(sub, "new", 50)
+                data = fetch_listing(sub, "new", 100)
                 children = data.get("data", {}).get("children", [])
             except Exception as e:
                 print(f"[ERROR] {sub}: {e}")
