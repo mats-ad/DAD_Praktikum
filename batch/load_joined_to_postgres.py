@@ -4,11 +4,9 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, to_date
 from pyspark.sql.utils import AnalysisException
 
-# ---------- Paths ----------
 LAKE_ROOT = os.getenv("LAKE_ROOT", "/data/lake")
 JOINED_PATH = os.getenv("JOINED_PATH", os.path.join(LAKE_ROOT, "joined", "daily"))
 
-# ---------- Postgres JDBC ----------
 PG_HOST = os.getenv("PG_HOST", "postgres")
 PG_PORT = os.getenv("PG_PORT", "5432")
 PG_DB = os.getenv("PG_DB", "gabi")
@@ -20,7 +18,7 @@ PG_URL = os.getenv("PG_URL", f"jdbc:postgresql://{PG_HOST}:{PG_PORT}/{PG_DB}")
 PG_TABLE = os.getenv("PG_TABLE", "joined_daily")
 PG_STAGE = os.getenv("PG_STAGE_TABLE", f"{PG_TABLE}__staging")
 
-INTERVAL_SECONDS = int(os.getenv("INTERVAL_SECONDS", "300"))  # default 5 min
+INTERVAL_SECONDS = int(os.getenv("INTERVAL_SECONDS", "300"))  
 
 
 def exec_sql_in_postgres(spark: SparkSession, sql: str) -> None:
@@ -45,20 +43,17 @@ def exec_sql_in_postgres(spark: SparkSession, sql: str) -> None:
 
 
 def run_once(spark: SparkSession) -> None:
-    # 1) Read parquet
     try:
         df = spark.read.parquet(JOINED_PATH)
     except AnalysisException:
         print(f"[WAIT] Parquet not found yet: {JOINED_PATH}")
         return
 
-    # 2) Normalize schema
     df = (
         df.withColumn("day", to_date(col("day")))
         .select("ticker", "day", "price_day_last", "avg_sentiment", "mentions")
     )
 
-    # 3) Write into staging (overwrite is OK here)
     (
         df.write.format("jdbc")
         .option("url", PG_URL)
@@ -70,9 +65,6 @@ def run_once(spark: SparkSession) -> None:
         .save()
     )
 
-    # 4) Atomic-ish swap into target without dropping target table
-    #    - lock target to avoid readers seeing half state
-    #    - truncate and insert
     swap_sql = f"""
     BEGIN;
 
@@ -107,7 +99,6 @@ def main() -> None:
         try:
             run_once(spark)
         except Exception as e:
-            # nicht crashen -> loop soll weiterlaufen
             print(f"[ERR] run_once failed: {e}")
         time.sleep(INTERVAL_SECONDS)
 

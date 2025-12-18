@@ -14,7 +14,7 @@ schema = StructType([
     StructField("symbol", StringType()),
     StructField("price", DoubleType()),
     StructField("source", StringType()),
-    StructField("ingest_ts", StringType()),  # ISO string (z.B. 2025-12-17T15:30:00Z)
+    StructField("ingest_ts", StringType()), 
 ])
 
 def main():
@@ -43,15 +43,13 @@ def main():
         .select(
             col("d.symbol").alias("symbol"),
             col("d.price").alias("price"),
-            # robust: versuche ISO, sonst "jetzt"
             coalesce(
                 to_timestamp(col("d.ingest_ts"), "yyyy-MM-dd'T'HH:mm:ssX"),
-                to_timestamp(col("d.ingest_ts")),  # fallback
+                to_timestamp(col("d.ingest_ts")),  
                 current_timestamp()
             ).alias("ingest_ts"),
             col("d.source").alias("source"),
         )
-        # wichtig: nicht nur symbol, sondern auch price filtern
         .where(col("symbol").isNotNull() & col("price").isNotNull())
     )
 

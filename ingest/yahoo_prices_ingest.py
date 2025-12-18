@@ -21,7 +21,7 @@ SYMBOLS = [
     "GME"
 ]
 
-POLL_SECONDS = 30  # alle 30s reicht locker
+POLL_SECONDS = 30  
 
 
 def fetch_price(symbol: str) -> float | None:
@@ -31,20 +31,17 @@ def fetch_price(symbol: str) -> float | None:
     try:
         t = yf.Ticker(symbol)
 
-        # 1) "fast_info" ist häufig am zuverlässigsten
         fi = getattr(t, "fast_info", None)
         if fi:
             p = fi.get("last_price") or fi.get("lastPrice")
             if p is not None:
                 return float(p)
 
-        # 2) Fallback über info
         info = t.info or {}
         p = info.get("regularMarketPrice") or info.get("currentPrice")
         if p is not None:
             return float(p)
 
-        # 3) Letzter Fallback: 1m-history
         hist = t.history(period="1d", interval="1m")
         if not hist.empty:
             return float(hist["Close"].iloc[-1])
@@ -69,7 +66,7 @@ def main():
 
             event = {
                 "symbol": symbol,
-                "price": price,                 # kann None sein
+                "price": price,                
                 "source": "yahoo",
                 "ingest_ts": datetime.now(timezone.utc).isoformat()
             }
@@ -77,7 +74,7 @@ def main():
             producer.send(TOPIC, event)
             print(f"[SEND] {symbol} price={price}")
 
-            time.sleep(1)  # kleine Pause
+            time.sleep(1)  
 
         time.sleep(POLL_SECONDS)
 

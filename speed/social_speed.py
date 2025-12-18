@@ -48,7 +48,6 @@ def main():
     spark = (
         SparkSession.builder
         .appName("SocialSpeedLayer")
-        # WICHTIG: Spark 3.5.x + Scala 2.12
         .config(
             "spark.jars.packages",
             "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1"

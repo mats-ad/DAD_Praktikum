@@ -66,10 +66,8 @@ def main():
                 producer.send(TOPIC, event)
                 print(f"[SEND] {key} -> {TOPIC}")
 
-            # höflich: nicht dauerfeuern
             time.sleep(10)
 
-        # einmal pro Runde etwas länger pausieren
         time.sleep(20)
 
 if __name__ == "__main__":

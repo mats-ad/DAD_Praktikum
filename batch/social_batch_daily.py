@@ -1,4 +1,3 @@
-# batch/social_batch_daily.py
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, to_date, avg, count
 from pyspark.sql.types import DoubleType

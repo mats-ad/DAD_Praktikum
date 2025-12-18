@@ -1,4 +1,3 @@
-# batch/joined_daily.py
 import os
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
@@ -15,7 +14,6 @@ def main():
     prices = spark.read.parquet(PRICES)
     social = spark.read.parquet(SOCIAL)
 
-    # prices: symbol -> ticker
     prices = prices.withColumnRenamed("symbol", "ticker")
 
     joined = (

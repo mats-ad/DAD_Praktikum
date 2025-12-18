@@ -14,13 +14,12 @@ services:
     depends_on:
       - zookeeper
     ports:
-      - "29092:29092" # Host -> Kafka
-      - "9092:9092" # optional
+      - "29092:29092"
+      - "9092:9092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
 
-      # intern: 9092, extern: 29092
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
@@ -73,16 +72,13 @@ services:
       dockerfile: jobs/joined_to_postgres/Dockerfile
     container_name: gabi_joined_to_postgres
     environment:
-      # Parquet im gemounteten /data
       JOINED_PATH: /data/lake/joined/daily
 
-      # JDBC im Container: postgres (Service-Name), nicht localhost
       PG_URL: jdbc:postgresql://postgres:5432/gabi
       PG_USER: gabi
       PG_PASSWORD: gabi_pw
       PG_TABLE: joined_daily
 
-      # alle 5 Minuten neu schreiben
       INTERVAL_SECONDS: "300"
     volumes:
       - ./data:/data
@@ -169,13 +165,11 @@ services:
     environment:
       LAKE_ROOT: /data/lake
 
-      # Spark Jobs brauchen JDBC url/creds:
       PG_URL: jdbc:postgresql://postgres:5432/gabi
       PG_USER: gabi
       PG_PASSWORD: gabi_pw
       PG_TABLE: joined_daily
 
-      # psql (investment_signal.sql)
       POSTGRES_HOST: postgres
       POSTGRES_DB: gabi
       POSTGRES_USER: gabi

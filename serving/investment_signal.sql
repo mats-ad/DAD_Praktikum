@@ -1,6 +1,3 @@
--- serving/investment_signal.sql
--- Ziel: IMMER erfolgreich ausführbar (egal ob vorher View oder Materialized View existiert)
-
 DROP MATERIALIZED VIEW IF EXISTS public.investment_signal_daily;
 DROP VIEW IF EXISTS public.investment_signal_daily;
 
